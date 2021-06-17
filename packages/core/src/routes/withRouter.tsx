@@ -40,6 +40,7 @@ type WindowHistoryState = typeof window.history.state;
 
 export interface ReactOidcHistory {
   push: (url?: string | null, stateHistory?: WindowHistoryState) => void;
+  replaceCurrent: (url?: string | null) => void;
 }
 
 const getHistory = (
@@ -54,6 +55,11 @@ const getHistory = (
       windowInternal.history.pushState({ key, state }, null, url);
       windowInternal.dispatchEvent(CreateEventInternal('popstate'));
     },
+    replaceCurrent: (url?: string | null): void => {
+      const state = windowInternal.history.state;
+      windowInternal.history.replaceState(state, null, url);
+      windowInternal.dispatchEvent(CreateEventInternal('popstate'));
+    }
   };
 };
 

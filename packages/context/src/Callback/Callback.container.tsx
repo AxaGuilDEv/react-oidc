@@ -6,15 +6,15 @@ import withServices from '../withServices';
 export const onRedirectSuccess = (history: ReactOidcHistory, oidcLogInternal: typeof oidcLog) => (user: User) => {
   oidcLogInternal.info('Successfull login Callback', user);
   if (user.state.url) {
-    history.push(user.state.url);
+    history.replaceCurrent(user.state.url);
   } else {
     oidcLogInternal.warn('no location in state');
   }
 };
 
-export const onRedirectError = (history: ReactOidcHistory, oidcLogInternal: typeof oidcLog) => ({ message }: { message: string }) => {
+export const onRedirectError = (oidcLogInternal: typeof oidcLog, userManager: UserManager) => ({ message }: { message: string }) => {
   oidcLogInternal.error(`There was an error handling the token callback: ${message}`);
-  history.push(`/authentication/not-authenticated?message=${encodeURIComponent(message)}`);
+  userManager.signinRedirect({ data: { url: "/" } })
 };
 
 type CallbackContainerCoreProps = {
@@ -30,7 +30,7 @@ export const CallbackContainerCore: FC<CallbackContainerCoreProps> = ({
   callbackComponentOverride: CallbackComponentOverride,
 }) => {
   const onSuccess = onRedirectSuccess(history, oidcLogInternal);
-  const onError = onRedirectError(history, oidcLogInternal);
+  const onError = onRedirectError(oidcLogInternal, getUserManagerInternal());
 
   useEffect(() => {
     getUserManagerInternal()
